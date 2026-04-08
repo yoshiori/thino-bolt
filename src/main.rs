@@ -6,7 +6,7 @@ use urlencoding::encode;
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Obsidan Thino CLI - Bolt speed!")]
 struct Args {
-    valut: String,
+    vault: String,
 
     #[arg(required = true)]
     content: Vec<String>,
@@ -30,7 +30,7 @@ fn main() {
     let encoded_data = encode(&full_memo);
     let obsidian_url = format!(
         "obsidian://advanced-uri?vault={}&daily=true&data={}&mode=append",
-        args.valut, encoded_data
+        args.vault, encoded_data
     );
 
     if let Err(e) = Command::new("xdg-open").arg(obsidian_url).spawn() {
