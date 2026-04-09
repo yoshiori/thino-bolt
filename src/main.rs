@@ -1,4 +1,4 @@
-use chrono::Local;
+use chrono::{DateTime, Local};
 use clap::Parser;
 use std::process::Command;
 use urlencoding::encode;
@@ -18,9 +18,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let memo_text = args.content.join(" ");
-    let now = Local::now().format("%H:%M").to_string();
-
-    let full_memo = build_memo(&memo_text, args.tag.as_deref(), &now);
+    let full_memo = build_memo(&memo_text, args.tag.as_deref(), Local::now());
 
     let obsidian_url = build_obsidian_url(&args.vault, &full_memo);
 
@@ -29,12 +27,13 @@ fn main() {
     }
 }
 
-fn build_memo(content: &str, tag: Option<&str>, time: &str) -> String {
+fn build_memo(content: &str, tag: Option<&str>, time: DateTime<Local>) -> String {
+    let time_str = time.format("%H:%M").to_string();
     let tag_part = match tag {
         Some(tag) => format!(" #{}", tag),
         None => String::new(),
     };
-    format!("- [ ] {} {}{}", time, content, tag_part)
+    format!("- [ ] {} {}{}", time_str, content, tag_part)
 }
 
 fn build_obsidian_url(vault: &str, memo: &str) -> String {
@@ -47,17 +46,21 @@ fn build_obsidian_url(vault: &str, memo: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use chrono::TimeZone;
+
     use super::*;
 
     #[test]
     fn test_build_memo_without_tag() {
-        let memo = build_memo("Test memo", None, "12:00");
+        let time = Local.with_ymd_and_hms(2024, 6, 1, 12, 0, 0).unwrap();
+        let memo = build_memo("Test memo", None, time);
         assert_eq!(memo, "- [ ] 12:00 Test memo");
     }
 
     #[test]
     fn test_build_memo_with_tag() {
-        let memo = build_memo("Test memo", Some("tag1"), "12:00");
+        let time = Local.with_ymd_and_hms(2024, 6, 1, 12, 0, 0).unwrap();
+        let memo = build_memo("Test memo", Some("tag1"), time);
         assert_eq!(memo, "- [ ] 12:00 Test memo #tag1");
     }
 
