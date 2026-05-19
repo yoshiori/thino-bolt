@@ -26,7 +26,7 @@ fn main() {
     // own messages reach the terminal and surfaces failures via the exit code.
     match Command::new("obsidian").args(&thino_args).status() {
         Ok(status) if status.success() => {}
-        Ok(_) => exit(1),
+        Ok(status) => exit(status.code().unwrap_or(1)),
         Err(e) if e.kind() == ErrorKind::NotFound => {
             eprintln!(
                 "`obsidian` command not found on PATH. \
