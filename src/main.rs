@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::io::ErrorKind;
 use std::process::{exit, Command};
 
 #[derive(Parser, Debug)]
@@ -26,6 +27,13 @@ fn main() {
     match Command::new("obsidian").args(&thino_args).status() {
         Ok(status) if status.success() => {}
         Ok(_) => exit(1),
+        Err(e) if e.kind() == ErrorKind::NotFound => {
+            eprintln!(
+                "`obsidian` command not found on PATH. \
+                 Install Obsidian 1.12+ and make sure the `obsidian` CLI is on your PATH."
+            );
+            exit(1);
+        }
         Err(e) => {
             eprintln!("Failed to run obsidian CLI: {}", e);
             exit(1);
